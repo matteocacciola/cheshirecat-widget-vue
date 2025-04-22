@@ -1,0 +1,38 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "components.d.ts",
+    "globals.d.ts",
+    "auto-imports.d.ts"
+  ],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "types": ["vite/client", "node"],
+    "moduleResolution": "Bundler",
+    "verbatimModuleSyntax": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowJs": true,
+    "removeComments": true,
+    "importHelpers": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "composite": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@stores/*": ["src/stores/*"],
+      "@models/*": ["src/models/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  }
+}
