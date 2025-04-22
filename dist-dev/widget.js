@@ -76224,37 +76224,41 @@ function requireFileManager() {
       __publicField(this, "prefix", "/file_manager");
     }
     /**
-     * This endpoint returns the settings of all plugin file managers. Plugin file managers are set to a system level,
-     * so usable by all the agents in the system.
+     * This endpoint returns the settings of all plugin file managers, either for the agent identified by the agentId
+     * parameter (for multi-agent installations) or for the default agent (for single-agent installations).
+     *
+     * @param agentId The ID of the agent to get the settings of
      *
      * @returns the settings of all plugin file managers
      *
      */
-    async getFileManagersSettings() {
-      return this.get(this.formatUrl("/settings"), this.systemId);
+    async getFileManagersSettings(agentId) {
+      return this.get(this.formatUrl("/settings"), agentId);
     }
     /**
-     * This endpoint returns the settings of a specific plugin file manager. Plugin file managers are set to a system
-     * level, so usable by all the agents in the system.
+     * This endpoint returns the settings of a specific plugin file manager, either for the agent identified by the agentId
+     * parameter (for multi-agent installations) or for the default agent (for single-agent installations).
      *
      * @param fileManager the name of the plugin file manager
+     * @param agentId The ID of the agent to get the settings of
      *
      * @returns the settings of the specified plugin file manager
      */
-    async getFileManagerSettings(fileManager2) {
-      return this.get(this.formatUrl(`/settings/${fileManager2}`), this.systemId);
+    async getFileManagerSettings(fileManager2, agentId) {
+      return this.get(this.formatUrl(`/settings/${fileManager2}`), agentId);
     }
     /**
-     * This endpoint updates the settings of a specific Plugin file manager. Plugin file managers are set to a system
-     * level, so usable by all the agents in the system.
+     * This endpoint updates the settings of a specific Plugin file manager, either for the agent identified by the agentId
+     * parameter (for multi-agent installations) or for the default agent (for single-agent installations).
      *
      * @param fileManager the name of the plugin file manager
      * @param values the new settings for the plugin file manager
+     * @param agentId The ID of the agent to get the settings of
      *
      * @returns the updated settings of the specified plugin file manager
      */
-    async putFileManagerSettings(fileManager2, values) {
-      return this.put(this.formatUrl(`/settings/${fileManager2}`), values, this.systemId);
+    async putFileManagerSettings(fileManager2, values, agentId) {
+      return this.put(this.formatUrl(`/settings/${fileManager2}`), values, agentId);
     }
   }
   fileManager.FileManagerEndpoint = FileManagerEndpoint;
@@ -76671,13 +76675,7 @@ function requireRabbitHole() {
       const blob = new Blob([fileBuffer], { type: fileMimeType });
       form.append(formKey, blob, finalFileName);
     }
-    appendQueryDataToForm(form, chunkSize, chunkOverlap, metadata) {
-      if (chunkSize) {
-        form.append("chunk_size", chunkSize.toString());
-      }
-      if (chunkOverlap) {
-        form.append("chunk_overlap", chunkOverlap.toString());
-      }
+    appendQueryDataToForm(form, metadata) {
       if (metadata) {
         form.append("metadata", JSON.stringify(metadata));
       }
@@ -76697,7 +76695,8 @@ function requireRabbitHole() {
      * - In browser: Pass a File object as `fileSource`
      *
      * The file is uploaded to the RabbitHole server and processed asynchronously.
-     * The CheshireCat processes the injection in background, and the client will be informed when processing completes.
+     * The CheshireCat processes the injection in the background, and the client will be informed when processing
+     * completes.
      *
      * @param fileSource The source of the file to upload:
      *                  - In Node.js: A string path to the file
@@ -76705,8 +76704,6 @@ function requireRabbitHole() {
      * @param fileName Optional custom name for the file. If not provided:
      *                - In Node.js: The basename of the file path is used
      *                - In browser: The name property of the File object is used
-     * @param chunkSize Optional size of chunks for RAG processing
-     * @param chunkOverlap Optional overlap between chunks
      * @param agentId Optional ID of the agent to associate with this upload
      * @param metadata Optional additional metadata to associate with the file
      *
@@ -76726,11 +76723,11 @@ function requireRabbitHole() {
      * const response = await rabbitHoleEndpoint.postFile('/path/to/document.pdf');
      * ```
      */
-    async postFile(fileSource, fileName, chunkSize, chunkOverlap, agentId, metadata) {
+    async postFile(fileSource, fileName, agentId, metadata) {
       const form = (0, form_data_2.createFormData)();
       try {
         await this.appendFileToForm(form, fileSource, "file", fileName);
-        this.appendQueryDataToForm(form, chunkSize, chunkOverlap, metadata);
+        this.appendQueryDataToForm(form, metadata);
         return await this.submitForm(form, this.prefix, agentId);
       } catch (error) {
         this.throwError(fileSource, error);
@@ -76752,8 +76749,6 @@ function requireRabbitHole() {
      * @param fileSources The sources of the file to upload:
      *                  - In Node.js: An array of strings path to the file
      *                  - In browser: An array of File objects
-     * @param chunkSize Optional size of chunks for RAG processing
-     * @param chunkOverlap Optional overlap between chunks
      * @param agentId Optional ID of the agent to associate with this upload
      * @param metadata Optional additional metadata to associate with the file
      *
@@ -76773,13 +76768,13 @@ function requireRabbitHole() {
      * const response = await rabbitHoleEndpoint.postFiles(['/path/to/first/document.pdf', '/path/to/second/document.pdf']);
      * ```
      */
-    async postFiles(fileSources, chunkSize, chunkOverlap, agentId, metadata) {
+    async postFiles(fileSources, agentId, metadata) {
       const form = new form_data_1.default();
       try {
         await Promise.all(fileSources.map(async (fileSource) => {
           await this.appendFileToForm(form, fileSource, "files");
         }));
-        this.appendQueryDataToForm(form, chunkSize, chunkOverlap, metadata);
+        this.appendQueryDataToForm(form, metadata);
         return await this.submitForm(form, this.formatUrl("/batch"), agentId);
       } catch (error) {
         this.throwError(fileSources[0], error);
@@ -76787,26 +76782,19 @@ function requireRabbitHole() {
     }
     /**
      * This method posts a web URL to the RabbitHole API. The web URL is ingested into the RAG system. The web URL is
-     * processed by the RAG system by Web scraping and the results are stored in the RAG database. The process is
+     * processed by the RAG system by Web scraping, and the results are stored in the RAG database. The process is
      * asynchronous.
-     * The CheshireCat processes the injection in background and the client will be informed at the end of the process.
+     * The CheshireCat processes the injection in the background, and the client will be informed at the end of the
+     * process.
      *
      * @param webUrl The URL of the web page to be ingested.
-     * @param chunkSize The size of the chunks to be used for the upload. If not provided, the default chunk size will be used.
-     * @param chunkOverlap The size of the overlap between chunks. If not provided, the default overlap size will be used.
      * @param agentId The ID of the agent to be used for the upload. If not provided, the default agent will be used.
      * @param metadata Additional metadata to be associated with the web URL.
      *
      * @returns The response from the RabbitHole API.
      */
-    async postWeb(webUrl, chunkSize, chunkOverlap, agentId, metadata) {
+    async postWeb(webUrl, agentId, metadata) {
       const payload = { url: webUrl };
-      if (chunkSize) {
-        payload["chunk_size"] = chunkSize;
-      }
-      if (chunkOverlap) {
-        payload["chunk_overlap"] = chunkOverlap;
-      }
       if (metadata) {
         payload["metadata"] = metadata;
       }
@@ -80848,7 +80836,7 @@ const useRabbitHole = /* @__PURE__ */ defineStore("rabbitHole", () => {
   const sendFile = (file, agentId) => {
     currentState.loading = true;
     tryRequest(
-      apiClient == null ? void 0 : apiClient.rabbitHole().postFile(file, file.name, null, null, agentId),
+      apiClient == null ? void 0 : apiClient.rabbitHole().postFile(file, file.name, agentId),
       `File ${file.name} successfully sent down the rabbit hole!`,
       "Unable to send the file to the rabbit hole"
     ).then((res) => {
@@ -80872,7 +80860,7 @@ const useRabbitHole = /* @__PURE__ */ defineStore("rabbitHole", () => {
   const sendWebsite = (url, agentId) => {
     currentState.loading = true;
     tryRequest(
-      apiClient == null ? void 0 : apiClient.rabbitHole().postWeb(url, null, null, agentId),
+      apiClient == null ? void 0 : apiClient.rabbitHole().postWeb(url, agentId),
       "Website successfully sent down the rabbit hole",
       "Unable to send the website to the rabbit hole"
     ).then((res) => {

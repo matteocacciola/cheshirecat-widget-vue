@@ -12,7 +12,7 @@ export const useRabbitHole = defineStore('rabbitHole', () => {
   const sendFile = (file: File, agentId?: string | null) => {
     currentState.loading = true
     tryRequest(
-      apiClient?.rabbitHole().postFile(file, file.name, null, null, agentId),
+      apiClient?.rabbitHole().postFile(file, file.name, agentId),
       `File ${file.name} successfully sent down the rabbit hole!`, 
       'Unable to send the file to the rabbit hole'
     ).then(res => {
@@ -38,7 +38,7 @@ export const useRabbitHole = defineStore('rabbitHole', () => {
   const sendWebsite = (url: string, agentId?: string | null) => {
     currentState.loading = true
     tryRequest(
-      apiClient?.rabbitHole().postWeb(url, null, null, agentId),
+      apiClient?.rabbitHole().postWeb(url, agentId),
       'Website successfully sent down the rabbit hole',
       'Unable to send the website to the rabbit hole'
     ).then(res => {
