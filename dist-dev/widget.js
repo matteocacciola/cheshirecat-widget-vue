@@ -75562,7 +75562,11 @@ function requireAbstract() {
       return this.deserialize(response.data);
     }
     async put(endpoint, payload, agentId, userId) {
-      const response = await this.getHttpClient(agentId, userId).put(endpoint, { json: payload });
+      const options = {};
+      if (payload) {
+        options.json = payload;
+      }
+      const response = await this.getHttpClient(agentId, userId).put(endpoint, options);
       return this.deserialize(response.data);
     }
     async delete(endpoint, agentId, userId, payload) {
@@ -75963,6 +75967,43 @@ function requireChunker() {
   chunker.ChunkerEndpoint = ChunkerEndpoint;
   return chunker;
 }
+var customEndpoint = {};
+var hasRequiredCustomEndpoint;
+function requireCustomEndpoint() {
+  if (hasRequiredCustomEndpoint) return customEndpoint;
+  hasRequiredCustomEndpoint = 1;
+  Object.defineProperty(customEndpoint, "__esModule", { value: true });
+  customEndpoint.CustomEndpoint = void 0;
+  const abstract_1 = requireAbstract();
+  class CustomEndpoint extends abstract_1.AbstractEndpoint {
+    /**
+     * This method is used to trigger a custom endpoint with a GET method
+     */
+    async getCustom(url, agentId, userId) {
+      return this.get(url, agentId, userId);
+    }
+    /**
+     * This method is used to trigger a custom endpoint with a POST method
+     */
+    async postCustom(url, payload, agentId, userId) {
+      return this.post(url, payload, agentId, userId);
+    }
+    /**
+     * This method is used to trigger a custom endpoint with a PUT method
+     */
+    async putCustom(url, payload, agentId, userId) {
+      return this.put(url, payload, agentId, userId);
+    }
+    /**
+     * This method is used to trigger a custom endpoint with a DELETE method
+     */
+    async deleteCustom(url, payload, agentId, userId) {
+      return this.delete(url, agentId, userId, payload);
+    }
+  }
+  customEndpoint.CustomEndpoint = CustomEndpoint;
+  return customEndpoint;
+}
 var embedder = {};
 var hasRequiredEmbedder;
 function requireEmbedder() {
@@ -76259,6 +76300,9 @@ function requireFileManager() {
      */
     async putFileManagerSettings(fileManager2, values, agentId) {
       return this.put(this.formatUrl(`/settings/${fileManager2}`), values, agentId);
+    }
+    async getFileManagerAttributes(agentId) {
+      return this.get(this.formatUrl("/"), agentId);
     }
   }
   fileManager.FileManagerEndpoint = FileManagerEndpoint;
@@ -77079,6 +77123,7 @@ function requireClient() {
   const admins_1 = requireAdmins();
   const authHandler_1 = requireAuthHandler();
   const chunker_1 = requireChunker();
+  const customEndpoint_1 = requireCustomEndpoint();
   const embedder_1 = requireEmbedder();
   const largeLanguageModel_1 = requireLargeLanguageModel();
   const message_1 = requireMessage();
@@ -77152,6 +77197,9 @@ function requireClient() {
     }
     users() {
       return new users_1.UsersEndpoint(this);
+    }
+    custom() {
+      return new customEndpoint_1.CustomEndpoint(this);
     }
     /**
      * Closes the WebSocket connection.
