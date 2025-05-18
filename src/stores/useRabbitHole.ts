@@ -9,10 +9,10 @@ export const useRabbitHole = defineStore('rabbitHole', () => {
 
   const { sendNotificationFromJSON } = useNotifications()
 
-  const sendFile = (file: File, agentId?: string | null) => {
+  const sendFile = (file: File, agentId: string) => {
     currentState.loading = true
     tryRequest(
-      apiClient?.rabbitHole().postFile(file, file.name, agentId),
+      apiClient?.rabbitHole().postFile(file, agentId, file.name),
       `File ${file.name} successfully sent down the rabbit hole!`, 
       'Unable to send the file to the rabbit hole'
     ).then(res => {
@@ -22,10 +22,10 @@ export const useRabbitHole = defineStore('rabbitHole', () => {
     })
   }
 
-  const sendMemory = (file: File, agentId?: string | null) => {
+  const sendMemory = (file: File, agentId: string) => {
     currentState.loading = true
     tryRequest(
-      apiClient?.rabbitHole().postMemory(file, file.name, agentId),
+      apiClient?.rabbitHole().postMemory(file, agentId, file.name),
       'Memories file successfully sent down the rabbit hole!',
       'Unable to send the memories to the rabbit hole'
     ).then(res => {
@@ -35,7 +35,7 @@ export const useRabbitHole = defineStore('rabbitHole', () => {
     })
   }
 
-  const sendWebsite = (url: string, agentId?: string | null) => {
+  const sendWebsite = (url: string, agentId: string) => {
     currentState.loading = true
     tryRequest(
       apiClient?.rabbitHole().postWeb(url, agentId),

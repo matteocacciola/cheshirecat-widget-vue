@@ -94,7 +94,9 @@ export const useMessages = defineStore('messages', () => {
     /**
      * Unsubscribes to the messages service on component unmount
      */
-    apiClient.close()
+    const { agentId, userId } = storeToRefs(useMainStore())
+
+    apiClient.close(agentId.value, userId?.value)
   })
 
   /**
@@ -124,8 +126,8 @@ export const useMessages = defineStore('messages', () => {
    */
   const dispatchMessage = async (
     message: string,
-    agentId?: string | null,
-    userId?: string | null,
+    agentId: string,
+    userId: string,
     callback?: (message: string) => Promise<string>,
   ) => {
     let messageToSend = new Message(message)

@@ -16,11 +16,11 @@ export const useMainStore = defineStore('main', () => {
 		set: value => cookies.set('ccat_user_token', value),
 	})
 	const agentId = computed({
-		get: () => cookies.get<string | undefined>('ccat_agent_id') ?? 'agent',
+		get: () => cookies.get<string>('ccat_agent_id'),
 		set: value => cookies.set('ccat_agent_id', value),
 	})
 	const userId = computed({
-		get: () => cookies.get<string | undefined>('ccat_user_id'),
+		get: () => cookies.get<string>('ccat_user_id'),
 		set: value => cookies.set('ccat_user_id', value),
 	})
 

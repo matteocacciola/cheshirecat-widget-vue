@@ -101,11 +101,11 @@ const contentHandler = (content: string | File[] | null) => {
 		if (content.trim().length == 0) return
 		try {
 			new URL(content)
-			sendWebsite(content, agentId?.value)
+			sendWebsite(content, agentId.value)
 		} catch (_) {
-			dispatchMessage(content, agentId?.value, userId?.value, settings.callback)
+			dispatchMessage(content, agentId.value, userId.value, settings.callback)
 		}
-	} else content.forEach(f => sendFile(f, agentId?.value))
+	} else content.forEach(f => sendFile(f, agentId.value))
 }
 
 /**
@@ -137,7 +137,7 @@ useEventListener<ClipboardEvent>(dropContentZone, 'paste', evt => {
  */
 onFileUpload(files => {
 	if (files == null) return
-	sendFile(files[0], agentId?.value)
+	sendFile(files[0], agentId.value)
 	emit('upload', files[0])
 })
 
@@ -147,7 +147,7 @@ onFileUpload(files => {
  */
 onMemoryUpload(files => {
 	if (files == null) return
-	sendMemory(files[0], agentId?.value)
+	sendMemory(files[0], agentId.value)
 	emit('upload', files[0])
 })
 
@@ -203,7 +203,7 @@ const dispatchWebsite = () => {
 	if (!insertedURL.value) return
 	try {
 		new URL(insertedURL.value)
-		sendWebsite(insertedURL.value, agentId?.value)
+		sendWebsite(insertedURL.value, agentId.value)
 		emit('upload', insertedURL.value)
 		boxUploadURL.value?.toggleModal()
 	} catch (_) {
@@ -217,7 +217,7 @@ const dispatchWebsite = () => {
 const sendMessage = (message: string) => {
 	if (message === '') return
 	userMessage.value = ''
-	dispatchMessage(message, agentId?.value, userId?.value, settings.callback)
+	dispatchMessage(message, agentId.value, userId.value, settings.callback)
 }
 
 /**

@@ -6,7 +6,7 @@ export const useMemory = defineStore('memory', () => {
   const { sendNotificationFromJSON } = useNotifications()
   const { currentState: messagesState } = storeToRefs(useMessages())
 
-  const wipeConversation = async (agentId?: string | null, userId?: string | null) => {
+  const wipeConversation = async (agentId: string, userId: string) => {
     const result = await tryRequest(
       apiClient?.memory().deleteConversationHistory(agentId, userId),
       'The current conversation was wiped',
